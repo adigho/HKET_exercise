@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>etnet經濟通 - 極速報價</title>
+<meta name="viewport" content="324, initial-scale=1.0, maximum-scale=1, user-scalable=no"/>
+<link href="../style/quote_super_light.min.css?20170802" rel="stylesheet" type="text/css" />
+<style>
+a{color:#000;}
+</style>
+<script language="javascript" type="text/javascript" src="/www/tc/common/js/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="/www/tc/common/js/jquery.autocomplete.min.js?20160421"></script>
+<script type="text/javascript">
+// Google Analytics
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-40595331-1', 'etnet.com.hk');
+ga('require', 'linkid', 'linkid.js');
+ga('require', 'displayfeatures');
+ga('send', 'pageview');
+
+// Google DFP
+(function() {
+var useSSL = 'https:' == document.location.protocol;
+var src = (useSSL ? 'https:' : 'http:') +
+'//www.googletagservices.com/tag/js/gpt.js';
+document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+})();
+</script>
+<!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1091635964206134');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1091635964206134&ev=PageView&noscript=1"
+/></noscript>
+<!-- DO NOT MODIFY -->
+<!-- End Facebook Pixel Code -->
+<!-- Begin comScore Tag -->
+<script>
+	var _comscore = _comscore || [];
+	_comscore.push({ c1: "2", c2: "7576977" });
+	(function() {
+		var s = document.createElement("script"), el = document.getElementsByTagName("script")[0]; s.async = true;
+		s.src = (document.location.protocol == "https:" ? "https://sb" : "http://b") + ".scorecardresearch.com/beacon.js";
+		el.parentNode.insertBefore(s, el);
+	})();
+</script>
+<noscript>
+	<img src="http://b.scorecardresearch.com/p?c1=2&c2=7576977&cv=2.0&cj=1" />
+</noscript>
+<!-- End comScore Tag -->
+<!-- Start Alexa Certify Javascript -->
+<script type="text/javascript">
+_atrk_opts = { atrk_acct:"6iMwi1asyr00gP", domain:"etnet.com.hk",dynamic: true};
+(function() { var as = document.createElement('script'); as.type = 'text/javascript'; as.async = true; as.src = "https://d31qbv1cthcecs.cloudfront.net/atrk.js"; var s = document.getElementsByTagName('script')[0];s.parentNode.insertBefore(as, s); })();
+</script>
+<noscript><img src="https://d5nxst8fruw4z.cloudfront.net/atrk.gif?account=6iMwi1asyr00gP" style="display:none" height="1" width="1" alt="" /></noscript>
+<!-- End Alexa Certify Javascript -->
+<script type="text/javascript" src="/www/tc/stocks/ads/stocks_ad_quote_super.js"></script>
+<script type="text/javascript" src="/www/tc/common/ads/common_ad_functions.js"></script><!-- rose need?-->
+<script type="text/javascript">
+function openNewWindow(type) {
+	var url = '';
+	if (type == 'etnet') url = '/www/tc/home/index.php';
+	else if (type == 'chart') url = '/www/tc/stocks/realtime/quote_chart_interactive.php?code=1';
+	if (url != '') window.open(url,'_blank');
+}
+function changeColor(cvalue) {
+	cvalue = (cvalue!='light' && cvalue!='dark')? 'light': cvalue;
+	var existing_cvalue = getCookie('et_color');
+	existing_cvalue = existing_cvalue.split(';');
+	var new_cvalue = '';
+	if (existing_cvalue.length > 0) {
+		new_cvalue = existing_cvalue[0]+';'+cvalue;
+	} else {
+		new_cvalue = '2;'+cvalue;
+	}
+	setCookie('et_color', new_cvalue, '31536000');
+	window.location.reload();
+}
+function search() {
+	var searchCode = $('#globalsearch').val();
+	if (isPositiveInteger(searchCode)) {
+		$.post("/www/tc/../../ajax/check_code.php", {code: searchCode})
+			.done(function(result) {
+				result = $.parseJSON(result);
+				if (result.isValid == 'true') {
+					var link = 'quote_super.php?code=' + searchCode;
+					window.top.location = link;
+				} else {
+					alert('請輸入正確股票代號');
+					$('#globalsearch').focus();
+					$('#globalsearch').select();
+				}
+			});
+	} else {
+		alert('請輸入正確股票代號');
+		$('#globalsearch').focus();
+		$('#globalsearch').select();
+	}
+	return false;
+}
+function validateCommonSearch() {
+	search();
+}
+/*-----  Function: refresh realtime quote page for mobile -----*/
+function refreshgeneral(url) {
+	window.location = url;
+}
+function reloadgeneral(url) {
+	setTimeout("refreshgeneral('" + url + "')", 500);
+}
+/*-----  Function: refresh realtime quote page for mobile -----*/
+/*-----  Function: form validation -----*/
+function isPositiveInteger(x) {
+	result = (isNaN(x) || x < 1 || x.toString().indexOf(".") != -1)? false: true;
+	return result;
+}
+/*-----  Function: form validation -----*/
+/*-----  Function: cookies -----*/
+function setCookie(c_name,value,expiredays,use_subdomain) {
+	use_subdomain = (typeof use_subdomain === "undefined") ? true : use_subdomain;
+	var exdate=new Date();
+	//exdate.setDate(exdate.getDate()+expiredays);
+	exdate.setTime(exdate.getTime() + (expiredays * 86400000));
+	var domain = (use_subdomain)?"":"domain=.etnet.com.hk;";
+	document.cookie=c_name+ "=" +escape(value)+
+	((expiredays==null) ? "" : ";"+domain+"path=/;expires="+exdate.toGMTString());
+}
+function getCookie(c_name) {
+	if (document.cookie.length>0) {
+		c_start=document.cookie.indexOf(c_name + "=");
+		if (c_start!=-1) {
+			c_start=c_start + c_name.length+1;
+			c_end=document.cookie.indexOf(";",c_start);
+			if (c_end==-1) c_end=document.cookie.length;
+			return unescape(document.cookie.substring(c_start,c_end));
+		}
+	}
+	return "";
+}
+/*-----  Function: cookies -----*/
+/*-----  Function: attach / detach auto complete -----*/
+attachAutoComplete = function(pagetype) {
+	// lang = TC / SC / en
+	if (typeof pagetype === 'undefined') pagetype = 'web';
+	var top = 100;
+	var left = $("#SiteLogo").width()+32;
+	var searchboxDIVid = 'globalsearch';
+	var autoCompDIVid = 'autoCompDIV';
+	var exchangeType = 'ALL';
+	var stockMoreLink = "http://www.etnet.com.hk/www/tc/stocks/company_search.php";
+	var ashareMoreLink = "http://www.etnet.com.hk/www/tc/ashares/search.php";
+	var asid = 'AS2';
+
+	switch (pagetype) {
+		case 'superquote':
+			top = 138;
+			left = 1;
+			break;
+		case 'quote':
+			top = 30;
+			left = 0;
+			searchboxDIVid = 'quotesearch';
+			autoCompDIVid = 'quoteAutoCompDIV';
+			break;
+	}
+
+	$("#"+searchboxDIVid).autocomplete("http://auto.etnet.com.hk/AutoComplete/AutoComplete?lang=TC&jsonCallback=?", {
+		minChars: 1,
+		width: 320,
+		max:10,
+		scroll:false,
+		delay:100,
+		selectFirst:true,
+		dataType: 'json',
+		matchSubset:false,
+		top: top,
+		left: left,
+		acDIVid: autoCompDIVid,
+		extype: exchangeType,
+		asid: asid,
+		stockMoreLink: stockMoreLink,
+		ashareMoreLink: ashareMoreLink,
+		parse: function(data) {
+			var rows = [];
+			for(var i=0; i<data.length; i++){
+				rows[rows.length] = {
+					data:"<table width=320 border=0 cellpadding=0 cellspacing=0><tr style='line-height:20px'><td width=15% align=left>"+data[i].code+"</td><td width=34% align=left>" + data[i].namech + "</td><td width=40% align=left style='font-size:11px'>" + data[i].nameen + "</td><td width=11% align=left>"+data[i].market+"</td></tr></table>",
+					result:data[i].code
+				};
+			}
+			return rows;
+		},
+		formatItem: function(row, i, max) {
+			return row;
+		},
+		formatMatch: function(row, i, max) {
+			return row;
+		},
+		formatResult: function(row) {
+			return row;
+		}
+	});
+};
+/*-----  Function: attach / detach auto complete -----*/
+/*-----  Function: jquery-browser-plugin-----*/
+var matched, browser;
+jQuery.uaMatch = function( ua ) {
+	ua = ua.toLowerCase();
+	var match = /(opr)[\/]([\w.]+)/.exec( ua ) ||
+		/(chrome)[ \/]([\w.]+)/.exec( ua ) ||
+		/(version)[ \/]([\w.]+).*(safari)[ \/]([\w.]+)/.exec(ua) ||
+		/(webkit)[ \/]([\w.]+)/.exec( ua ) ||
+		/(opera)(?:.*version|)[ \/]([\w.]+)/.exec( ua ) ||
+		/(msie) ([\w.]+)/.exec( ua ) ||
+		ua.indexOf("trident") >= 0 && /(rv)(?::| )([\w.]+)/.exec( ua ) ||
+		ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec( ua ) ||
+		[];
+	var platform_match = /(ipad)/.exec( ua ) ||
+		/(iphone)/.exec( ua ) ||
+		/(android)/.exec( ua ) ||
+		/(windows phone)/.exec(ua) ||
+		/(win)/.exec( ua ) ||
+		/(mac)/.exec( ua ) ||
+		/(linux)/.exec( ua ) ||
+		[];
+	return {
+		browser: match[ 3 ] || match[ 1 ] || "",
+		version: match[ 2 ] || "0",
+		platform: platform_match[0] || ""
+	};
+};
+matched = jQuery.uaMatch( window.navigator.userAgent );
+browser = {};
+if ( matched.browser ) {
+	browser[ matched.browser ] = true;
+	browser.version = matched.version;
+	browser.versionNumber = parseFloat(matched.version, 10);
+}
+if ( matched.platform ) {
+	browser[ matched.platform ] = true;
+}
+// Chrome, Opera 15+ and Safari are webkit based browsers
+if ( browser.chrome || browser.opr || browser.safari ) {
+	browser.webkit = true;
+}
+// IE11 has a new token so we will assign it msie to avoid breaking changes
+if ( browser.rv ) {
+	var ie = 'msie';
+
+	matched.browser = ie;
+	browser[ie] = true;
+}
+// Opera 15+ are identified as opr
+if ( browser.opr ) {
+	var opera = 'opera';
+
+	matched.browser = opera;
+	browser[opera] = true;
+}
+// Assign the name and platform variable
+browser.name = matched.browser;
+browser.platform = matched.platform;
+jQuery.browser = browser;
+/*-----  Function: jquery-browser-plugin-----*/
+$(document).ready(function () {
+	$("#globalsearch").focus(function() {
+		$("#search").removeClass("inputnormal");
+		$("#search").addClass("inputfocus");
+	});
+	$("#globalsearch").blur(function() {
+		$("#search").removeClass("inputfocus");
+		$("#search").addClass("inputnormal");
+	});
+	$('#globalsearch').select();
+	$('#globalsearch').focus();
+	$('#globalsearch').click(function() {
+		$(this).val('');
+	});
+	$('#globalsearch').keypress(function (e) {
+		if (e.which == 13) {
+			return search();
+		}
+	});
+	$('#Rsearch tr[data-code]').click(function() {
+		ga('send', 'event', 'link', 'click', 'stocks|quote_super|即時最近搜看');
+		window.location = 'quote_super.php?code='+$(this).data('code');
+	});
+	$('#light').click(function() {
+		changeColor('light');
+	});
+	$('#dark').click(function() {
+		changeColor('dark');
+	});
+	$("#container").prepend('<div id="autoCompDIV"></div>');
+	attachAutoComplete('superquote');
+});
+</script>
+</head>
+<body>
+<div id="container">
+	<!-- Indexes -->
+	<div id="indexes">
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" id="indexbar_stock">
+			<tr>
+				<td>恒指</td>
+				<td class="nominal down2"><span class="arrow"></span>28,977</td>
+				<td align="right">-475</td>
+				<td align="right">(-1.61%)</td>
+				<td>大市成交 1,768億</td>
+			</tr>
+			<tr>
+				<td>期指</td>
+				<td class="nominal down2"><span class="arrow"></span>28,822</td>
+				<td align="right">-432</td>
+				<td align="right">(-1.48%)</td>
+				<td class="down2">低水155</td>
+			</tr>
+			<tr>
+				<td>上證</td>
+				<td class="nominal down2"><span class="arrow"></span>3,489</td>
+				<td align="right">-63</td>
+				<td align="right">(-1.76%)</td>
+				<td>成交 3,508億</td>
+			</tr>
+		</table>
+	</div>
+	<!-- Indexes -->
+	<div id="ad" style="text-align:center;"><script type='text/javascript'>showDFP('super_topbanner');</script></div>
+	<!-- Menu -->
+	<div id="menu">
+		<!-- Begin Search -->
+		<div id="search" class="inputnormal">
+			<form id="StkSearchForm" action="/www/tc/stocks/realtime/quote_super.php?code=00001" method="post">
+				<input name="globalsearch" id="globalsearch" type="text" maxlength="6" value="00001"/>
+				<div title="Search" onclick="search();"></div>
+			</form>
+		</div>
+		<!-- End Search -->
+		<div id="refresh" title="Refresh 更新" onclick="ga('send', 'event', 'link', 'refresh', 'stocks|quote_super|Refresh'); reloadgeneral('/www/tc/stocks/realtime/quote_super.php?code=00001');"></div>
+		<div id="chart" title="Chart 圖表" onclick="openNewWindow('chart');"></div>
+		<div id="color">
+			<div id="light" title="Light Color 淺色" class="selected"></div>
+			<div id="dark" title="Dark Color 深色" class="normal"></div>
+		</div>
+		<div id="logo" title="etnet 經濟通" onclick="openNewWindow('etnet');"></div>
+	</div>
+	<!-- Menu -->
+	<!-- Content -->
+	<div id="content">
+		<table style="border-bottom:0; padding-bottom:0px;" border="0" cellpadding="0" cellspacing="0">
+			<tbody>
+			<tr>
+				<td colspan="2" class="stockName">
+					<a href="quote.php?code=1" target="_blank">00001&nbsp;</a>
+																			</td>
+			</tr>
+			<tr>
+				<td class="nominal unchange">
+					<ul>
+						<li class="arrow"></li>
+						<li class="number"></li>
+					</ul>
+				</td>
+				<td rowspan="2" class="chart"><div style="height:56px; overflow:hidden; float:right;"><img src="../../common/images/spacer.gif" width="182" height="56" /></div></td>
+			</tr>
+			<tr>
+				<td style="font-weight:bold;"> </td>
+			</tr>
+			</tbody>
+		</table>
+		<table border="0" cellpadding="0" cellspacing="0" style="padding:0;">
+			<tbody>
+				<tr>
+					<td valign="bottom">買入<sup>#</sup>&nbsp;<span style="padding-right:4px;" class="data"></span></td>
+					<td valign="bottom">賣出<sup>#</sup>&nbsp;<span style="padding-right:4px;" class="data"></span></td>
+					<td valign="bottom" style="text-align:right">主動買&nbsp;<span style="padding-right:4px;" class="data">%</span></td>
+					<td valign="bottom" style="text-align:right">主動沽&nbsp;<span class="data">%</span></td>
+				</tr>
+			</tbody>
+		</table>
+		<table border="0" cellpadding="0" cellspacing="0">
+			<tbody>
+			<tr>
+				<td style="letter-spacing:-1px;">最高</td>
+				<td class="data"></td>
+				<td style="letter-spacing:-1px;">前收市</td>
+				<td class="data"></td>
+			</tr>
+			<tr>
+				<td style="letter-spacing:-1px;">最低</td>
+				<td class="data"></td>
+				<td style="letter-spacing:-1px;">開市</td>
+				<td class="data"></td>
+			</tr>
+			<tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr><tr><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td><td style="letter-spacing:-1px;">&nbsp;</td><td class="data">&nbsp;</td></tr>			</tbody>
+		</table>
+				<!-- Recent Search -->
+		<table id="Rsearch" class="RSearch" border="0" cellspacing="0" cellpadding="0">
+			<tbody>
+				<tr>
+					<td  colspan="3"><a href="../../members/recent_search.php" target="_blank"><span class="recent_hdr">即時最近搜看</span></a></td>
+				</tr>
+				<tr><td height="180"></td></tr>			</tbody>
+		</table>
+		<!-- Recent Search -->
+	</div>
+	<!-- Content -->
+	<!-- Bottom Ads -->
+	<div style="text-align:center;"><script type='text/javascript'>showDFP('super_bottombanner');</script></div>
+	<!-- Bottom Ads -->
+	<!-- Footer -->
+	<div id="footer">
+		<div id="etnet" title="etnet 經濟通" onclick="openNewWindow('etnet');"></div>
+		<div id="disclaimer" style="letter-spacing:-1px;">
+			即時報價更新時間為 --，#為15分鐘延遲報價。港股即時基本市場行情由香港交易所提供; 香港交易所指定免費發放即時基本市場行情的網站		</div>
+	</div>
+	<!-- Footer -->
+</div>
+</body>
+</html>
+<!--  -->
