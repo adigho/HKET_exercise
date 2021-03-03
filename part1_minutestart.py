@@ -31,15 +31,15 @@ def getDriver():
 		driverLog.append(driver) #log down all driver in use to terminate while program terminates
 	return driver
 
-def etNetWebdriverLoad():
+def etNetWebdriverLoad(arg):
 	driver = getDriver()
 	driver.get(etNetUrl)
 
-def assWebdriverLoad():
+def assWebdriverLoad(arg):
 	driver = getDriver()
 	driver.get(etNetUrl)
 
-def ejWebdriverLoad():
+def ejWebdriverLoad(arg):
 	driver = getDriver()
 	driver.get(etNetUrl)
 
@@ -221,11 +221,15 @@ if __name__ == "__main__":
 	etNettPool = ThreadPool(10)
 	asstPool = ThreadPool(10)
 	ejtPool = ThreadPool(10)
-	etNettPool.map(etNetWebdriverLoad())
-	asstPool.map(assWebdriverLoad())
-	ejtPool.map(ejWebdriverLoad())
+	#preLoading of the webdriver
+	etNettPool.map(etNetWebdriverLoad, [None for i in range(10)])
+	asstPool.map(assWebdriverLoad, [None for i in range(10)])
+	ejtPool.map(ejWebdriverLoad, [None for i in range(10)])
 	try: #try for catching Crtl-C for termination
 		while True:
+			print("About to sleep for", 60 - localtime()[5])
+			sleep(60 - localtime()[5]) #sleep till the start of next minute
+
 			print("Start")
 			startTime = time()
 			currentTime = localtime()
@@ -258,11 +262,6 @@ if __name__ == "__main__":
 
 			print("Used Time:", time()-startTime)
 			print("Current Time:", strftime("%H%M%S", localtime()))
-			#if runtime for one trial takes over 60s, add sleep time so the program would restart in the next minute
-			sleepTime = 60 - (time() - startTime)
-			if sleepTime > 0:
-				print("About to sleep for ", sleepTime)
-				sleep(sleepTime)
 	except KeyboardInterrupt:
 		print("Terminaing...")
 		try:
