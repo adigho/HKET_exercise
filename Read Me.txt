@@ -1,0 +1,7 @@
+Part 1:
+
+stock_getter.py gets all HK stock with respect to their stock number and stock name from HKEJ and stores the information to stock_list.txt for later parts
+
+part1.py is the main program for part 1 which read stock_list.txt and open ETNet and AAStocks by headless Chrome webdriver and scrape information from them.
+As the limitation of CPU, only 10 processes are called once and generally 40 stock details (20 from ETNet and AAStocks) are scraped in one minute.
+The program can be terminated by pressing Crtl-C and it may takes about one minute to close the webdriver

@@ -12,18 +12,18 @@ stockList https://stock360.hkej.com/stockList
 
 
 
-	現價
-	最高 24 (check 23)
-	最低 28
-	升跌 18
-	升跌（%）18
-	成交量        volumn
-	成交金額 		turnover
-	市盈率 	peRatio
-	每手股數 boardLot
-	市值 mktCap
-	每股盈利 eps
-	收益率 precentYld
+現價
+最高 24 (check 23)
+最低 28
+升跌 18
+升跌（%）18
+成交量        volumn
+成交金額 		turnover
+市盈率 	peRatio
+每手股數 boardLot
+市值 mktCap
+每股盈利 eps
+收益率 precentYld
 	52週最高 yearHigh
 	52週最低 yearLow
 

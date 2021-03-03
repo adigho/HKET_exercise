@@ -9,7 +9,8 @@ from time import time, sleep, localtime, strftime
 #global variables
 cDriverPath = 'chromedriver.exe' #please change to apporiate version of chromedriver from https://chromedriver.chromium.org/downloads
 stockPath = 'stock_list.txt'
-url = 'http://www.etnet.com.hk/www/tc/stocks/realtime/quote.php?code='
+etNetUrl = 'http://www.etnet.com.hk/www/tc/stocks/realtime/quote.php?code='
+aasUrl = 'http://www.aastocks.com/tc/mobile/quote.aspx?symbol='
 threadLocal = threading.local()
 count = 0
 driverLog = []
@@ -28,8 +29,8 @@ def getDriver():
 		driverLog.append(driver) #log down all driver in use to terminate while program terminates
 	return driver
 
-def pageLoading(record):
-	pageUrl = url + record[0]
+def etNetpageLoading(record):
+	pageUrl = etNetUrl + record[0]
 	stockNumber = int(record[0])
 	driver = getDriver()
 	driver.get(pageUrl) #open website with headless webdriver
@@ -37,10 +38,22 @@ def pageLoading(record):
 	refreshButton.click()
 	sleep(0.75) #sleep for 0.75s to wait for webpage refresh
 	sauce = bs(driver.page_source, 'html.parser') #pass the source page to BeautifulSoup
-	result = scarping(sauce, stockNumber)
+	result = etNetscarping(sauce, stockNumber)
 	return result
 
-def scarping(sauce, number):
+def aaspageLoading(record):
+	pageUrl = aasUrl + record[0]
+	stockNumber = int(record[0])
+	driver = getDriver()
+	driver.get(pageUrl) #open website with headless webdriver
+	refreshButton = driver.find_element_by_class_name("btn_go") #locate the refresh button to extract data
+	refreshButton.click()
+	sleep(0.75) #sleep for 0.75s to wait for webpage refresh
+	sauce = bs(driver.page_source, 'html.parser') #pass the source page to BeautifulSoup
+	result = aasscarping(sauce, stockNumber)
+	return result
+
+def etNetscarping(sauce, number):
 	global count
 	count += 1
 	print('{0} Page Taken'.format(count))
@@ -53,8 +66,6 @@ def scarping(sauce, number):
 			change = changeSet[0]
 			changePercent = changeSet[1][1:-1]
 		except IndexError:
-			print("Array!")
-			print(changeSet, number)
 			change, changePercent = 'NA'
 			errorType = 'Index'
 		overViewNumbers = [tag.text for tag in overViewTags.find_all("span", {"class":"Number"})]
@@ -83,6 +94,45 @@ def scarping(sauce, number):
 		return [number, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'Attribute']
 	return [number, price, high, low, change, changePercent, volumn, turnover, peRatio, boardLot, mktCap, eps, precentYld, yearHigh, yearLow, errorType]
 
+def aasscarping(sauce, number):
+	global count
+	count += 1
+	print('{0} Page Taken'.format(count))
+	errorType = None
+	try:
+		quoteOverview = sauce.find("div", {"id":"cphContent_pQuoteDetail"}) #locating the wrap box for the data
+		quoteTable = quoteOverview.find("table", {"class":"quote_table"})
+		td = quoteTable.find_all("td")
+		try:
+			overViews = td[1]
+			overViewsValues = td[1].find_all("span")
+			price = overViewsValues[2].text.strip()
+			change = overViewsValues[3].text.strip()
+			changePercent = overViewsValues[4].text.strip()
+
+			highLowWrap = td[1].find_all("div")[3]
+			highLow = highLowWrap.text.strip().split()[1]
+			low, high = highLow.split('-')
+
+			volumn = td[7].text.strip()[3:]
+			boardLot = td[8].text.strip()[4:]
+			turnover = td[9].text.strip()[4:]
+			peRatio = td[10].text.strip()[7:]
+			precentYld = td[11].text.strip()[4:]
+			eps = td[13].text.strip()[5:]
+			mktCap = td[14].text.strip()[2:]
+
+			yearWrap = quoteOverview.find("div", {"id":"cphContent_p52Week"})
+
+			yearHighLow = yearWrap.text.strip()[5:].split()
+			yearLow = yearHighLow[0]
+			yearHigh = yearHighLow[2]
+		except IndexError:
+			return [number, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'Index']
+	except AttributeError:
+		return [number, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'Attribute']
+	return [number, price, high, low, change, changePercent, volumn, turnover, peRatio, boardLot, mktCap, eps, precentYld, yearHigh, yearLow, errorType]
+
 if __name__ == "__main__":
 	#open the stockFile
 	stockFile = open(stockPath, 'r', encoding = 'utf-8')
@@ -98,26 +148,41 @@ if __name__ == "__main__":
 			startTime = time()
 			currentTime = localtime()
 			#parallel run pageLoading function
-			result = tPool.map(pageLoading, stockRecords[:20])
+			etNetresult = tPool.map(etNetpageLoading, stockRecords[:20])
 			#generate log files
-			logFilePath = r'ETNet Log Files/' + strftime("%m%d%H%M", currentTime) + r'_etnet_log.txt'
-			logFile = open(logFilePath, 'w', encoding = 'utf-8')
-			for items in result:
-				logFile.write(str(items) + '\n')
-			logFile.close()
+			etNetlogFilePath = r'ETNet Log Files/' + strftime("%m%d%H%M", currentTime) + r'_etnet_log.txt'
+			etNetlogFile = open(etNetlogFilePath, 'w', encoding = 'utf-8')
+			for items in etNetresult:
+				etNetlogFile.write(str(items) + '\n')
+			etNetlogFile.close()
+
+			#parallel run pageLoading function
+			aasresult = tPool.map(aaspageLoading, stockRecords[:20])
+			#generate log files
+			aaslogFilePath = r'AAS Log Files/' + strftime("%m%d%H%M", currentTime) + r'_AAS_log.txt'
+			aaslogFile = open(aaslogFilePath, 'w', encoding = 'utf-8')
+			for items in aasresult:
+				aaslogFile.write(str(items) + '\n')
+			aaslogFile.close()
+
 			print("Used Time:", time()-startTime)
 			print("Current Time:", strftime("%H%M%S", localtime()))
 			#if runtime for one trial takes over 60s, add sleep time so the program would restart in the next minute
 			sleepTime = 60 - (time() - startTime)
-			while sleepTime < 0:
-				sleepTime += 60
-			print("About to sleep for ", sleepTime)
-			sleep(sleepTime)
+			if sleepTime > 0:
+				print("About to sleep for ", sleepTime)
+				sleep(sleepTime)
 	except KeyboardInterrupt:
 		print("Terminaing...")
 		try:
 			#terminating possible opened log file
-			logFile.close()
+			etNetlogFile.close()
+		except:
+			pass
+
+		try:
+			#terminating possible opened log file
+			aaslogFile.close()
 		except:
 			pass
 
