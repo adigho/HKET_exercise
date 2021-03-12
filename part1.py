@@ -21,30 +21,56 @@ logFile = None
 def getDriver():
 	#generate new webdriver if no exitisting driver
 	global driverLog
-	driver = getattr(threadLocal, 'driver', None)
-	if driver == None:
+	etdriver = getattr(threadLocal, 'etdriver', None)
+	if etdriver == None:
 		chrome_options = Options()
 		chrome_options.add_argument('--headless')
-		#chrome_options.add_argument('--disable-gpu')
-		driver = webdriver.Chrome(cDriverPath, options=chrome_options)
-		setattr(threadLocal, 'driver', driver)
-		driverLog.append(driver) #log down all driver in use to terminate while program terminates
-	return driver
+		chrome_options.add_argument('--blink-settings=imagesEnabled=false')
+		chrome_options.add_argument('--disable-gpu')
+		chrome_options.add_argument("--log-level=3")
+		etdriver = webdriver.Chrome(cDriverPath, options=chrome_options, service_log_path = 'NUL')
+		etdriver.get(etNetUrl)
+		setattr(threadLocal, 'etdriver', etdriver)
+		driverLog.append(etdriver) #log down all driver in use to terminate while program terminates
+	aasdriver = getattr(threadLocal, 'aasdriver', None)
+	if aasdriver == None:
+		chrome_options = Options()
+		chrome_options.add_argument('--headless')
+		chrome_options.add_argument('--blink-settings=imagesEnabled=false')
+		chrome_options.add_argument('--disable-gpu')
+		chrome_options.add_argument("--log-level=3")
+		aasdriver = webdriver.Chrome(cDriverPath, options=chrome_options)
+		aasdriver.get(aasUrl)
+		setattr(threadLocal, 'aasdriver', aasdriver)
+		driverLog.append(aasdriver) #log down all driver in use to terminate while program terminates
+	ejdriver = getattr(threadLocal, 'ejdriver', None)
+	if ejdriver == None:
+		chrome_options = Options()
+		chrome_options.add_argument('--headless')
+		chrome_options.add_argument('--blink-settings=imagesEnabled=false')
+		chrome_options.add_argument('--disable-gpu')
+		chrome_options.add_argument("--log-level=3")
+		ejdriver = webdriver.Chrome(cDriverPath, options=chrome_options)
+		ejdriver.get(ejUrl)
+		setattr(threadLocal, 'ejdriver', ejdriver)
+		driverLog.append(ejdriver) #log down all driver in use to terminate while program terminates
+	return [etdriver, aasdriver, ejdriver]
 
-def etNetWebdriverLoad(arg):
-	driver = getDriver()
-	driver.get(etNetUrl)
+def driverInitialize(arg):
+	drivers = getDriver()
 
-def assWebdriverLoad(arg):
-	driver = getDriver()
-	driver.get(etNetUrl)
+def pagesScrapping(record):
+	etdriver, aasdriver, ejdriver = getDriver()
+	etResult = etNetpageLoading(record, etdriver)
+	aasResult = aaspageLoading(record, aasdriver)
+	ejResult = ejpageLoading(record, ejdriver)
+	global count
+	count += 1
+	print('{0} Stock(s) Taken'.format(count))
+	return [etResult, aasResult, ejResult]
 
-def ejWebdriverLoad(arg):
-	driver = getDriver()
-	driver.get(etNetUrl)
 
-def etNetpageLoading(record):
-	driver = getDriver()
+def etNetpageLoading(record, driver):
 	try:
 		if driver.current_url.split('/')[2] != 'www.etnet.com.hk':
 			driver.get(etNetUrl) #open website with headless webdriver if currently not opening etnet
@@ -59,12 +85,13 @@ def etNetpageLoading(record):
 	button = driver.find_element_by_id("quotesearch_submit") #locate the refresh button to extract data
 	button.click()
 	sleep(0.75) #sleep for 0.75s to wait for webpage refresh
+	currentTime = localtime()
 	sauce = bs(driver.page_source, 'html.parser') #pass the source page to BeautifulSoup
 	result = etNetscarping(sauce, int(record[0]))
+	result.append(strftime("%H%M", currentTime))
 	return result
 
-def aaspageLoading(record):
-	driver = getDriver()
+def aaspageLoading(record, driver):
 	try:
 		if not driver.current_url.split('/')[2] == 'www.aastocks.com':
 			driver.get(aasUrl) #open website with headless webdriver if currently not opening AAStock
@@ -76,12 +103,13 @@ def aaspageLoading(record):
 	button = driver.find_element_by_class_name("btn_go") #locate the refresh button to extract data
 	button.click()
 	sleep(0.75) #sleep for 0.75s to wait for webpage refresh
+	currentTime = localtime()
 	sauce = bs(driver.page_source, 'html.parser') #pass the source page to BeautifulSoup
 	result = aasscarping(sauce, int(record[0]))
+	result.append(strftime("%H%M", currentTime))
 	return result
 
-def ejpageLoading(record):
-	driver = getDriver()
+def ejpageLoading(record, driver):
 	try:
 		if not driver.current_url.split('/')[2] == 'stock360.hkej.com':
 			driver.get(ejUrl) #open website with headless webdriver if currently not opening AAStock
@@ -90,17 +118,16 @@ def ejpageLoading(record):
 	textbox = driver.find_element_by_id("inputCode") #locate the textbox
 	textbox.send_keys(Keys.CONTROL, 'a') #highlight all data
 	textbox.send_keys(record[0]) #input stock number
-	button = driver.find_element_by_class_name("submitLink") #locate the refresh button to extract data
+	button = driver.find_element_by_id("submitLink") #locate the refresh button to extract data
 	button.click()
 	sleep(0.75) #sleep for 0.75s to wait for webpage refresh
+	currentTime = localtime()
 	sauce = bs(driver.page_source, 'html.parser') #pass the source page to BeautifulSoup
 	result = ejscarping(sauce, int(record[0]))
+	result.append(strftime("%H%M", currentTime))
 	return result
 
 def etNetscarping(sauce, number):
-	global count
-	count += 1
-	print('{0} Page Taken'.format(count))
 	errorType = None
 	try:
 		overViewTags = sauce.find("div", {"id":"StkDetailMainBox"}) #locating the wrap box for the data
@@ -132,16 +159,13 @@ def etNetscarping(sauce, number):
 			eps = breakDownNumbers[22].split()[1]
 			precentYld = breakDownNumbers[20].split('/')[0]
 		except IndexError:
-			yearHigh, yearLow, boardLot, peRatio, eps, precentYld = 'NA'
+			yearHigh, yearLow, boardLot, peRatio, eps, precentYld = 'NA', 'NA', 'NA', 'NA', 'NA', 'NA'
 			errorType = 'Index'
 	except AttributeError:
 		return [number, 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'Attribute']
 	return [number, price, high, low, change, changePercent, volumn, turnover, peRatio, boardLot, mktCap, eps, precentYld, yearHigh, yearLow, errorType]
 
 def aasscarping(sauce, number):
-	global count
-	count += 1
-	print('{0} Page Taken'.format(count))
 	errorType = None
 	try:
 		quoteOverview = sauce.find("div", {"id":"cphContent_pQuoteDetail"}) #locating the wrap box for the data
@@ -178,9 +202,6 @@ def aasscarping(sauce, number):
 	return [number, price, high, low, change, changePercent, volumn, turnover, peRatio, boardLot, mktCap, eps, precentYld, yearHigh, yearLow, errorType]
 
 def ejscarping(sauce, number):
-	global count
-	count += 1
-	print('{0} Page Taken'.format(count))
 	errorType = None
 	try:
 		stockDetailWrap = sauce.find("div", {"class":"stockDetailWrap"}) #locating the wrap box for the data
@@ -218,13 +239,9 @@ if __name__ == "__main__":
 		stockRecords.append(line.strip('\n').split(','))
 	stockFile.close()
 	#multiprocessing
-	etNettPool = ThreadPool(10)
-	asstPool = ThreadPool(10)
-	ejtPool = ThreadPool(10)
+	pool = ThreadPool(5)
 	#preLoading of the webdriver
-	etNettPool.map(etNetWebdriverLoad, [None for i in range(10)])
-	asstPool.map(assWebdriverLoad, [None for i in range(10)])
-	ejtPool.map(ejWebdriverLoad, [None for i in range(10)])
+	pool.map(driverInitialize, [None for i in range(5)])
 	try: #try for catching Crtl-C for termination
 		while True:
 			print("About to sleep for", 60 - localtime()[5])
@@ -233,31 +250,43 @@ if __name__ == "__main__":
 			print("Start")
 			startTime = time()
 			currentTime = localtime()
+			result = []
 			#parallel run pageLoading function
-			etNetresult = etNettPool.map(etNetpageLoading, stockRecords[:20])
+			for i in range(int(len(stockRecords)/500)):
+				if i != int(len(stockRecords)/500) - 1:
+					partresult = pool.map(pagesScrapping, stockRecords[i*500 : (i+1)*500])
+				else:
+					partresult = pool.map(pagesScrapping, stockRecords[i*500 :])
+				for items in partresult:
+					result.append(items)
+				for i in range(len(driverLog)):
+					try:
+						driverLog[i].quit()
+						del driverLog[i]
+					except:
+						pass
+				threadLocal = threading.local()
+
+			
 			#generate log files
 			etNetlogFilePath = r'ETNet Log Files/' + strftime("%m%d%H%M", currentTime) + r'_etnet_log.txt'
 			etNetlogFile = open(etNetlogFilePath, 'w', encoding = 'utf-8')
-			for items in etNetresult:
-				etNetlogFile.write(str(items) + '\n')
+			for items in result:
+				etNetlogFile.write(str(items[0]) + '\n')
 			etNetlogFile.close()
 
-			#parallel run pageLoading function
-			aasresult = asstPool.map(aaspageLoading, stockRecords[:20])
 			#generate log files
 			aaslogFilePath = r'AAS Log Files/' + strftime("%m%d%H%M", currentTime) + r'_AAS_log.txt'
 			aaslogFile = open(aaslogFilePath, 'w', encoding = 'utf-8')
-			for items in aasresult:
-				aaslogFile.write(str(items) + '\n')
+			for items in result:
+				aaslogFile.write(str(items[1]) + '\n')
 			aaslogFile.close()
 
-			#parallel run pageLoading function
-			ejresult = ejtPool.map(aaspageLoading, stockRecords[:20])
 			#generate log files
 			ejlogFilePath = r'HKEJ Log Files/' + strftime("%m%d%H%M", currentTime) + r'_HKEJ_log.txt'
 			ejlogFile = open(ejlogFilePath, 'w', encoding = 'utf-8')
-			for items in ejresult:
-				ejlogFile.write(str(items) + '\n')
+			for items in result:
+				ejlogFile.write(str(items[2]) + '\n')
 			ejlogFile.close()
 
 			print("Used Time:", time()-startTime)
@@ -283,8 +312,9 @@ if __name__ == "__main__":
 			pass
 
 	#terminating all drivers
-	for a in driverLog:
+	for i in range(len(driverLog)):
 		try:
-			a.quit()
+			driverLog[i].quit()
+			print("close driver ", i)
 		except:
 			pass
